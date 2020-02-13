@@ -1,24 +1,33 @@
 const express = require('express');
 const Users = require('./userDb');
 const router = express.Router();
+const Posts = require("../posts/postDb");
 
 router.post('/', (req, res) => {
-  // do your magic!
-  console.log("headers", req.headers);
-
-  Users.get(req.query)
-    .then(users => {
-      res.status(200).json(users)
+  Users.insert(req.body)
+    .then(user => {
+      res.status(201).json(user)
     })
     .catch(error => {
       console.log(error);
-      res.status(500).json({ message: 'erros retrieving users'})
+      res.status(500).json({ message: 'error posting user'})
     })
 });
 
 router.post('/:id/posts', (req, res) => {
   // do your magic!
-
+   const postInfo = { ...req.body, user_id: req.params.id };
+  Posts.insert(postInfo)
+    .then(post => {
+      res.status(210).json(post);
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({
+        message: "error posting to user"
+      });
+    });
+   
 });
 
 router.get('/', (req, res) => {
@@ -83,10 +92,11 @@ router.delete('/:id', (req, res) => {
 
 router.put('/:id', (req, res) => {
   // do your magic!
-  Users.update(req.params.id, req.body)
-    .then(user => {
-      if(user) {
-        res.status(200).json(user);
+  const changes = req.body;
+  Users.update(req.params.id, changes)
+    .then(count => {
+      if(count > 0) {
+        res.status(200).json(count);
       } else {
         res.status(404).json({ message: "the user cannot be found" })
       }
