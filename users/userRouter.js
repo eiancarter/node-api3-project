@@ -99,8 +99,16 @@ router.put('/:id', (req, res) => {
 
 //custom middleware
 
-function validateUserId(req, res, next) {
+function validateUserId(guess) {
   // do your magic!
+  return function (req, res, next) {
+    const userId = req.headers.userId;
+    if (userId && userId === guess) {
+      next();
+    } else {
+      res.status(401).json({ errorMessage: "id does not exist!" })
+    }
+  }
 }
 
 function validateUser(req, res, next) {
